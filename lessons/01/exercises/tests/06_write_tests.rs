@@ -13,17 +13,18 @@
 ///
 /// Your task is to write a set (at least 8) of unit tests, use them to find (at least 2) bugs in
 /// this function and then fix the function.
-fn sanitize(input: &str) -> &str {
-    // Remove all x from the end of the string
-    let input = input.trim_end_matches("x");
-    // Remove all o from the end of the string
-    let mut input = input.trim_end_matches("o");
-
-    // Remove .exe from the end
-    if input.ends_with(".exe") {
-        input = &input[0..input.len() - 4];
+fn sanitize(mut input: &str) -> &str {
+    loop {
+        if input.ends_with("x") {
+            input = input.trim_end_matches("x");
+        } else if input.ends_with("o") {
+            input = input.trim_end_matches("o");
+        } else if input.ends_with(".exe") {
+            input = &input[0..input.len() - 4];
+        } else {
+            break;
+        }
     }
-
     input
 }
 
@@ -37,4 +38,49 @@ fn sanitize(input: &str) -> &str {
 mod tests {
     use super::sanitize;
 
+    #[test]
+    fn test_empty_string() {
+        assert_eq!(sanitize(""), "");
+    }
+
+    #[test]
+    fn test_nothing_to_remove() {
+        assert_eq!(sanitize("helle"), "helle");
+        assert_eq!(sanitize("hello.exew"), "hello.exew");
+    }
+
+    #[test]
+    fn test_remove_x() {
+        assert_eq!(sanitize("hellox"), "hell");
+    }
+
+    #[test]
+    fn test_remove_o() {
+        assert_eq!(sanitize("helloo"), "hell");
+    }
+
+    #[test]
+    fn test_remove_exe() {
+        assert_eq!(sanitize("hello.exe"), "hell");
+    }
+
+    #[test]
+    fn test_remove_xo() {
+        assert_eq!(sanitize("helloxo"), "hell");
+    }
+
+    #[test]
+    fn test_remove_x_exe() {
+        assert_eq!(sanitize("hellox.exe"), "hell");
+    }
+
+    #[test]
+    fn test_remove_o_exe() {
+        assert_eq!(sanitize("helloo.exe"), "hell");
+    }
+
+    #[test]
+    fn test_remove_xo_exe() {
+        assert_eq!(sanitize("helloxo.exe"), "hell");
+    }
 }
