@@ -3,7 +3,7 @@
 // TODO: Implement the Luhn algorithm (https://en.wikipedia.org/wiki/Luhn_algorithm),
 // which is used to check the validity of e.g. bank or credit card numbers.
 
-fn luhn_algorithm(mut number: u64) -> bool {
+const fn luhn_algorithm(mut number: u64) -> bool {
     let mut sum = 0;
     let mut is_second = false;
     while number > 0 {
@@ -45,15 +45,15 @@ mod tests {
 
     #[test]
     fn luhn_correct() {
-        assert!(luhn_algorithm(17893729974));
-        assert!(luhn_algorithm(79927398713));
+        assert!(luhn_algorithm(17_893_729_974));
+        assert!(luhn_algorithm(79_927_398_713));
     }
 
     #[test]
     fn luhn_incorrect() {
-        assert!(!luhn_algorithm(17893729975));
-        assert!(!luhn_algorithm(17893729976));
-        assert!(!luhn_algorithm(17893729977));
-        assert!(!luhn_algorithm(123456));
+        assert!(!luhn_algorithm(17_893_729_975));
+        assert!(!luhn_algorithm(17_893_729_976));
+        assert!(!luhn_algorithm(17_893_729_977));
+        assert!(!luhn_algorithm(123_456));
     }
 }

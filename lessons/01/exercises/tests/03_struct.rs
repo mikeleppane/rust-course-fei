@@ -12,12 +12,12 @@ struct Vec3 {
 }
 
 impl Vec3 {
-    fn new(x: f64, y: f64, z: f64) -> Self {
-        Vec3 { x, y, z }
+    const fn new(x: f64, y: f64, z: f64) -> Self {
+        Self { x, y, z }
     }
 
-    fn add(&self, other: Vec3) -> Vec3 {
-        Vec3 {
+    fn add(&self, other: &Self) -> Self {
+        Self {
             x: self.x + other.x,
             y: self.y + other.y,
             z: self.z + other.z,
@@ -25,10 +25,12 @@ impl Vec3 {
     }
 
     fn length(&self) -> f64 {
-        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+        self.z
+            .mul_add(self.z, self.x.mul_add(self.x, self.y * self.y))
+            .sqrt()
     }
 
-    fn normalize(&self) -> Vec3 {
+    fn normalize(&self) -> Self {
         let len = self.length();
         if len == 0.0 {
             Vec3::new(0.0, 0.0, 0.0)
@@ -46,16 +48,16 @@ mod tests {
     #[test]
     fn new() {
         let v1 = Vec3::new(1.2, 3.5, 6.0);
-        assert_eq!(v1.x, 1.2);
-        assert_eq!(v1.y, 3.5);
-        assert_eq!(v1.z, 6.0);
+        assert_almost_eq(v1.x, 1.2);
+        assert_almost_eq(v1.y, 3.5);
+        assert_almost_eq(v1.z, 6.0);
     }
 
     #[test]
     fn add() {
         let v1 = Vec3::new(1.2, 3.5, 6.0);
         let v2 = Vec3::new(4.8, 6.2, -2.3);
-        let v3 = v1.add(v2);
+        let v3 = v1.add(&v2);
         assert_almost_eq(v3.x, 6.0);
         assert_almost_eq(v3.y, 9.7);
         assert_almost_eq(v3.z, 3.7);
@@ -63,7 +65,7 @@ mod tests {
 
     #[test]
     fn length_zero() {
-        assert_eq!(Vec3::new(0.0, 0.0, 0.0).length(), 0.0);
+        assert_almost_eq(Vec3::new(0.0, 0.0, 0.0).length(), 0.0);
     }
 
     #[test]
@@ -74,9 +76,9 @@ mod tests {
     #[test]
     fn normalize_zero() {
         let norm = Vec3::new(0.0, 0.0, 0.0).normalize();
-        assert_eq!(norm.x, 0.0);
-        assert_eq!(norm.y, 0.0);
-        assert_eq!(norm.z, 0.0);
+        assert_almost_eq(norm.x, 0.0);
+        assert_almost_eq(norm.y, 0.0);
+        assert_almost_eq(norm.z, 0.0);
     }
 
     #[test]

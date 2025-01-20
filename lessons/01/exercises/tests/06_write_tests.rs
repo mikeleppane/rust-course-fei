@@ -15,10 +15,10 @@
 /// this function and then fix the function.
 fn sanitize(mut input: &str) -> &str {
     loop {
-        if input.ends_with("x") {
-            input = input.trim_end_matches("x");
-        } else if input.ends_with("o") {
-            input = input.trim_end_matches("o");
+        if input.ends_with('x') {
+            input = input.trim_end_matches('x');
+        } else if input.ends_with('o') {
+            input = input.trim_end_matches('o');
         } else if input.ends_with(".exe") {
             input = &input[0..input.len() - 4];
         } else {

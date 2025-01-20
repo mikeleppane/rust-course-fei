@@ -8,7 +8,7 @@
 
 fn find_largest(arr: [i32; 10]) -> i32 {
     let mut max = arr[0];
-    for &num in arr.iter() {
+    for &num in &arr {
         if num > max {
             max = num;
         }
