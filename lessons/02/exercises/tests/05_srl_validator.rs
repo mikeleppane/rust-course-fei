@@ -25,30 +25,95 @@
 // Hint: Put `#[derive(Debug, Eq, PartialEq)]` on top of `SRL` and `SRLValidationError`,
 // so that asserts in tests work.
 
+mod srl {
+    #[derive(Debug, Eq, PartialEq)]
+    pub struct Srl {
+        protocol: Option<String>,
+        address: String,
+    }
+
+    #[derive(Debug, Eq, PartialEq)]
+    pub enum SRLValidationError {
+        EmptyProtocol,
+        EmptyAddress,
+        InvalidCharacterInProtocol(char),
+        InvalidCharacterInAddress(char),
+    }
+
+    impl Srl {
+        pub fn new(srl: &str) -> Result<Self, SRLValidationError> {
+            if srl.is_empty() {
+                return Err(SRLValidationError::EmptyAddress);
+            }
+
+            let Some((protocol, address)) = srl.split_once("://") else {
+                if srl.chars().any(|c| !c.is_ascii_lowercase()) {
+                    return Err(SRLValidationError::InvalidCharacterInAddress(
+                        srl.chars().find(|c| !c.is_ascii_lowercase()).unwrap(),
+                    ));
+                }
+                return Ok(Self {
+                    protocol: None,
+                    address: srl.to_string(),
+                });
+            };
+
+            if protocol.is_empty() {
+                return Err(SRLValidationError::EmptyProtocol);
+            }
+
+            if protocol.chars().any(|c| !c.is_ascii_lowercase()) {
+                return Err(SRLValidationError::InvalidCharacterInProtocol(
+                    protocol.chars().find(|c| !c.is_ascii_lowercase()).unwrap(),
+                ));
+            }
+
+            if address.chars().any(|c| !c.is_ascii_lowercase()) {
+                return Err(SRLValidationError::InvalidCharacterInAddress(
+                    address.chars().find(|c| !c.is_ascii_lowercase()).unwrap(),
+                ));
+            }
+
+            Ok(Self {
+                protocol: Some(protocol.to_string()),
+                address: address.to_string(),
+            })
+        }
+
+        pub fn get_protocol(&self) -> Option<&str> {
+            self.protocol.as_deref()
+        }
+
+        pub fn get_address(&self) -> &str {
+            &self.address
+        }
+    }
+}
+
 /// Below you can find a set of unit tests.
 #[cfg(test)]
 mod tests {
-    use super::srl::{SRLValidationError, SRL};
+    use super::srl::{SRLValidationError, Srl};
 
     #[test]
     fn empty_address() {
-        assert_eq!(SRL::new(""), Err(SRLValidationError::EmptyAddress));
+        assert_eq!(Srl::new(""), Err(SRLValidationError::EmptyAddress));
     }
 
     #[test]
     fn only_separator() {
-        assert_eq!(SRL::new("://"), Err(SRLValidationError::EmptyProtocol));
+        assert_eq!(Srl::new("://"), Err(SRLValidationError::EmptyProtocol));
     }
 
     #[test]
     fn empty_protocol() {
-        assert_eq!(SRL::new("://foo"), Err(SRLValidationError::EmptyProtocol));
+        assert_eq!(Srl::new("://foo"), Err(SRLValidationError::EmptyProtocol));
     }
 
     #[test]
     fn multiple_protocols() {
         assert_eq!(
-            SRL::new("ab://bc://foo"),
+            Srl::new("ab://bc://foo"),
             Err(SRLValidationError::InvalidCharacterInAddress(':'))
         );
     }
@@ -56,11 +121,11 @@ mod tests {
     #[test]
     fn invalid_protocol() {
         assert_eq!(
-            SRL::new("bAc://foo"),
+            Srl::new("bAc://foo"),
             Err(SRLValidationError::InvalidCharacterInProtocol('A'))
         );
         assert_eq!(
-            SRL::new("a02://foo"),
+            Srl::new("a02://foo"),
             Err(SRLValidationError::InvalidCharacterInProtocol('0'))
         );
     }
@@ -68,11 +133,11 @@ mod tests {
     #[test]
     fn invalid_address_with_protocol() {
         assert_eq!(
-            SRL::new("abc://fo1o"),
+            Srl::new("abc://fo1o"),
             Err(SRLValidationError::InvalidCharacterInAddress('1'))
         );
         assert_eq!(
-            SRL::new("bar://fooBZcX"),
+            Srl::new("bar://fooBZcX"),
             Err(SRLValidationError::InvalidCharacterInAddress('B'))
         );
     }
@@ -80,11 +145,11 @@ mod tests {
     #[test]
     fn invalid_address_without_protocol() {
         assert_eq!(
-            SRL::new("fo1o"),
+            Srl::new("fo1o"),
             Err(SRLValidationError::InvalidCharacterInAddress('1'))
         );
         assert_eq!(
-            SRL::new("fooBAc"),
+            Srl::new("fooBAc"),
             Err(SRLValidationError::InvalidCharacterInAddress('B'))
         );
     }
@@ -92,11 +157,11 @@ mod tests {
     #[test]
     fn invalid_protocol_and_address() {
         assert_eq!(
-            SRL::new("bZcA://fo2o"),
+            Srl::new("bZcA://fo2o"),
             Err(SRLValidationError::InvalidCharacterInProtocol('Z'))
         );
         assert_eq!(
-            SRL::new("a20://barBAZ"),
+            Srl::new("a20://barBAZ"),
             Err(SRLValidationError::InvalidCharacterInProtocol('2'))
         );
     }
@@ -104,21 +169,21 @@ mod tests {
     #[test]
     fn invalid_char_emoji() {
         assert_eq!(
-            SRL::new("asd://fo🙃o"),
+            Srl::new("asd://fo🙃o"),
             Err(SRLValidationError::InvalidCharacterInAddress('🙃'))
         );
     }
 
     #[test]
     fn no_protocol() {
-        let srl = SRL::new("foobar").unwrap();
+        let srl = Srl::new("foobar").unwrap();
         assert_eq!(srl.get_protocol(), None);
         assert_eq!(srl.get_address(), "foobar");
     }
 
     #[test]
     fn protocol_and_scheme() {
-        let srl = SRL::new("bar://foobar").unwrap();
+        let srl = Srl::new("bar://foobar").unwrap();
         assert_eq!(srl.get_protocol(), Some("bar"));
         assert_eq!(srl.get_address(), "foobar");
     }

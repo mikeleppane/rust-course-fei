@@ -51,6 +51,57 @@ enum Event {
 // Compare this approach with using a struct (which we did on the lesson).
 // Is it easier with an enum or with a struct?
 
+const fn pc_transition(state: ComputerState, event: Event) -> ComputerState {
+    match (state, event) {
+        (ComputerState::Off, Event::TurnOn) => ComputerState::Running {
+            uptime: 0,
+            idle_time: 0,
+        },
+        (ComputerState::Running { uptime, idle_time }, Event::TurnOn) => {
+            ComputerState::Running { uptime, idle_time }
+        }
+        (ComputerState::Sleeping { uptime, sleep_time }, Event::TurnOn) => {
+            ComputerState::Sleeping { uptime, sleep_time }
+        }
+        (
+            ComputerState::Sleeping { uptime, .. } | ComputerState::Running { uptime, .. },
+            Event::MoveMouse,
+        ) => ComputerState::Running {
+            uptime,
+            idle_time: 0,
+        },
+        (ComputerState::Running { uptime, idle_time }, Event::PassTime(time)) => {
+            let new_uptime = uptime + time;
+            if idle_time + time > 1000 {
+                ComputerState::Sleeping {
+                    uptime: new_uptime,
+                    sleep_time: idle_time + time - 1000,
+                }
+            } else {
+                ComputerState::Running {
+                    uptime: new_uptime,
+                    idle_time: idle_time + time,
+                }
+            }
+        }
+        (ComputerState::Sleeping { uptime, sleep_time }, Event::PassTime(time)) => {
+            let new_uptime = uptime + time;
+            if sleep_time + time > 500 {
+                ComputerState::Off
+            } else {
+                ComputerState::Sleeping {
+                    uptime: new_uptime,
+                    sleep_time: sleep_time + time,
+                }
+            }
+        }
+        (
+            ComputerState::Off | ComputerState::Running { .. } | ComputerState::Sleeping { .. },
+            Event::PassTime(_) | Event::MoveMouse | Event::TurnOff,
+        ) => ComputerState::Off,
+    }
+}
+
 /// Below you can find a set of unit tests.
 #[cfg(test)]
 mod tests {
@@ -189,7 +240,10 @@ mod tests {
                 },
                 Event::PassTime(10000)
             ),
-            ComputerState::Off
+            ComputerState::Sleeping {
+                uptime: 10800,
+                sleep_time: 9100
+            }
         );
     }
 

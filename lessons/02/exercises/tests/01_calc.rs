@@ -10,6 +10,28 @@
 // operation should be performed on it.
 // Hint: max(..) and min(..) methods of `i32` might come in handy.
 
+enum Op {
+    Add(i32),
+    Sub(i32),
+    Clamp { low: i32, high: i32 },
+}
+
+fn perform_calculation(x: i32, op: &Op) -> i32 {
+    match op {
+        Op::Add(y) => x + y,
+        Op::Sub(y) => x - y,
+        Op::Clamp { low, high } => {
+            if x < *low {
+                *low
+            } else if x > *high {
+                *high
+            } else {
+                x
+            }
+        }
+    }
+}
+
 /// Below you can find a set of unit tests.
 #[cfg(test)]
 mod tests {
@@ -17,14 +39,14 @@ mod tests {
 
     #[test]
     fn calc_add() {
-        assert_eq!(perform_calculation(0, Op::Add(1)), 1);
-        assert_eq!(perform_calculation(3, Op::Add(10)), 13);
+        assert_eq!(perform_calculation(0, &Op::Add(1)), 1);
+        assert_eq!(perform_calculation(3, &Op::Add(10)), 13);
     }
 
     #[test]
     fn calc_sub() {
-        assert_eq!(perform_calculation(0, Op::Sub(10)), -10);
-        assert_eq!(perform_calculation(3000, Op::Sub(-5)), 3005);
+        assert_eq!(perform_calculation(0, &Op::Sub(10)), -10);
+        assert_eq!(perform_calculation(3000, &Op::Sub(-5)), 3005);
     }
 
     /// Clamp makes sure that a value is between a minimum and maximum value
@@ -36,11 +58,14 @@ mod tests {
     /// clamp(50, 0, 80)   = 50
     #[test]
     fn calc_clamp() {
-        assert_eq!(perform_calculation(0, Op::Clamp { low: 0, high: 0 }), 0);
-        assert_eq!(perform_calculation(5, Op::Clamp { low: 0, high: 0 }), 0);
-        assert_eq!(perform_calculation(3, Op::Clamp { low: 2, high: 8 }), 3);
-        assert_eq!(perform_calculation(-5, Op::Clamp { low: 0, high: 10 }), 0);
-        assert_eq!(perform_calculation(50, Op::Clamp { low: 3, high: 10 }), 10);
-        assert_eq!(perform_calculation(50, Op::Clamp { low: 3, high: 100 }), 50);
+        assert_eq!(perform_calculation(0, &Op::Clamp { low: 0, high: 0 }), 0);
+        assert_eq!(perform_calculation(5, &Op::Clamp { low: 0, high: 0 }), 0);
+        assert_eq!(perform_calculation(3, &Op::Clamp { low: 2, high: 8 }), 3);
+        assert_eq!(perform_calculation(-5, &Op::Clamp { low: 0, high: 10 }), 0);
+        assert_eq!(perform_calculation(50, &Op::Clamp { low: 3, high: 10 }), 10);
+        assert_eq!(
+            perform_calculation(50, &Op::Clamp { low: 3, high: 100 }),
+            50
+        );
     }
 }
