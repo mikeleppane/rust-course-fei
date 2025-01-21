@@ -9,6 +9,32 @@
 //
 // Hint: you can use `string.chars()` to create an iterator over the Unicode characters of a string.
 
+fn interleave(left: &str, right: &str) -> String {
+    let mut result = String::new();
+    let mut left_iter = left.chars();
+    let mut right_iter = right.chars();
+    loop {
+        match (left_iter.next(), right_iter.next()) {
+            (Some(l), Some(r)) => {
+                result.push(l);
+                result.push(r);
+            }
+            (Some(l), None) => {
+                result.push(l);
+                result.push_str(left_iter.as_str());
+                break;
+            }
+            (None, Some(r)) => {
+                result.push(r);
+                result.push_str(right_iter.as_str());
+                break;
+            }
+            (None, None) => break,
+        }
+    }
+    result
+}
+
 /// Below you can find a set of unit tests.
 #[cfg(test)]
 mod tests {

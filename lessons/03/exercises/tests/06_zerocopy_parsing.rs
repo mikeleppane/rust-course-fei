@@ -24,6 +24,64 @@
 // The format of the ticket is `<movie-name>;<day>;<visitor-name>`. The second semicolon is optional
 // when the visitor name is missing. There must not be any trailing data in the input string.
 
+#[derive(Debug, PartialEq, Eq)]
+pub struct Ticket<'a> {
+    movie: &'a str,
+    day: Day,
+    visitor: Option<&'a str>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Day {
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday,
+    Sunday,
+}
+
+fn parse_ticket(input: &str) -> Option<Ticket> {
+    let mut parts = input.split(';');
+    let movie = parts.next()?;
+    let day = parts.next()?;
+    let visitor = match parts.next() {
+        Some(visitor) if !visitor.is_empty() => Some(visitor),
+        None | Some(_) => None,
+    };
+    if parts.next().is_some() {
+        return None;
+    }
+    let day = match day.to_lowercase().as_str() {
+        "monday" => Day::Monday,
+        "tuesday" => Day::Tuesday,
+        "wednesday" => Day::Wednesday,
+        "thursday" => Day::Thursday,
+        "friday" => Day::Friday,
+        "saturday" => Day::Saturday,
+        "sunday" => Day::Sunday,
+        _ => return None,
+    };
+    if !movie.chars().all(|c| c.is_ascii_alphanumeric() || c == ' ') {
+        return None;
+    }
+
+    if let Some(visitor) = visitor {
+        if !visitor
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == ' ')
+        {
+            return None;
+        }
+    }
+    Some(Ticket {
+        movie,
+        day,
+        visitor,
+    })
+}
+
 /// Below you can find a set of unit tests.
 #[cfg(test)]
 mod tests {

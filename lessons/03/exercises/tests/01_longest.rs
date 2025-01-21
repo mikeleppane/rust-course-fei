@@ -3,6 +3,14 @@
 // TODO: Implement a function called `longest`, which will return the longer of the two
 // input strings. If they are the same length, return the first string.
 
+const fn longest<'a>(a: &'a str, b: &'a str) -> &'a str {
+    if a.len() >= b.len() {
+        a
+    } else {
+        b
+    }
+}
+
 /// Below you can find a set of unit tests.
 #[cfg(test)]
 mod tests {
@@ -38,12 +46,12 @@ mod tests {
     // The function has to return one of the two input strings, and cannot copy the string data.
     // `longest` should return the first string in this case, so it should be fine to
     // drop `b`. Right? :)
-    // #[test]
-    // fn longest_different_lifetimes_drop() {
-    //     let a = "longer";
-    //     let b = String::from("short");
-    //     let result = longest(a, &b);
-    //     drop(b);
-    //     assert_eq!(result, "longer");
-    // }
+    /* #[test]
+    fn longest_different_lifetimes_drop() {
+        let a = "longer";
+        let b = String::from("short");
+        let result = longest(a, &b);
+        drop(b);
+        assert_eq!(result, "longer");
+    } */
 }

@@ -8,6 +8,28 @@
 //!
 //! Bonus: Can you build a complete merge sort on top of this function? :)
 
+fn merge_slices(left: &[u32], right: &[u32]) -> Vec<u32> {
+    let mut result = Vec::with_capacity(left.len() + right.len());
+    let mut left_iter = left.iter();
+    let mut right_iter = right.iter();
+    let mut left_val = left_iter.next();
+    let mut right_val = right_iter.next();
+    while let (Some(l), Some(r)) = (left_val, right_val) {
+        if l < r {
+            result.push(*l);
+            left_val = left_iter.next();
+        } else {
+            result.push(*r);
+            right_val = right_iter.next();
+        }
+    }
+    result.extend(left_val);
+    result.extend(right_val);
+    result.extend(left_iter);
+    result.extend(right_iter);
+    result
+}
+
 /// Below you can find a set of unit tests.
 #[cfg(test)]
 mod tests {
