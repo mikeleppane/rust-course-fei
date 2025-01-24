@@ -66,6 +66,7 @@ where
 }
 
 impl<T: Clone> RingBuffer<T> {
+    #[must_use]
     pub fn new(size: usize) -> Self {
         let mut buffer = Vec::with_capacity(size);
         buffer.resize_with(size, || None);
@@ -112,6 +113,7 @@ impl<T: Clone> RingBuffer<T> {
         item
     }
 
+    #[must_use]
     pub fn peek(&self) -> Option<&T> {
         if self.len == 0 {
             None
@@ -120,13 +122,23 @@ impl<T: Clone> RingBuffer<T> {
         }
     }
 
-    pub fn iter(&self) -> RingbufferIterator<T> {
+    #[must_use]
+    pub const fn iter(&self) -> RingbufferIterator<T> {
         RingbufferIterator {
             buffer: &self.buffer,
             start: self.start,
             remaining: self.len,
             current: 0,
         }
+    }
+}
+
+impl<'a, T: Clone> IntoIterator for &'a RingBuffer<T> {
+    type Item = &'a T;
+    type IntoIter = RingbufferIterator<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
 

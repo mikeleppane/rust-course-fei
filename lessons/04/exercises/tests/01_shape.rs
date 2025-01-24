@@ -86,9 +86,9 @@ mod tests {
 
     #[test]
     fn circle2() {
-        let rectangle = Circle::new(122038.12);
-        assert_almost_eq(rectangle.area(), 46788690454.10);
-        assert_almost_eq(rectangle.perimeter(), 766788.122);
+        let rectangle = Circle::new(122_038.12);
+        assert_almost_eq(rectangle.area(), 46_788_690_454.10);
+        assert_almost_eq(rectangle.perimeter(), 766_788.122);
     }
 
     #[test]

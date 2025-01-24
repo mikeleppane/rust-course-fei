@@ -4,8 +4,6 @@
 //! Fibonacci numbers (starting from 0).
 //! `Fibonacci` should implement the `Default` trait.
 
-use std::result;
-
 struct Fibonacci {
     current: u64,
     next: u64,
@@ -57,6 +55,6 @@ mod tests {
 
     #[test]
     fn fibonacci_sixty() {
-        assert_eq!(Fibonacci::default().nth(59), Some(956722026041));
+        assert_eq!(Fibonacci::default().nth(59), Some(956_722_026_041));
     }
 }

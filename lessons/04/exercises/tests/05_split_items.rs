@@ -65,20 +65,17 @@ mod tests {
 
     #[test]
     fn split_empty() {
-        let result = SplitItems::new("", ' ').collect::<Vec<_>>();
-        assert!(result.is_empty());
+        assert!(SplitItems::new("", ' ').next().is_none());
     }
 
     #[test]
     fn split_one_delimiter() {
-        let result = SplitItems::new("c", 'c').collect::<Vec<_>>();
-        assert!(result.is_empty());
+        assert!(SplitItems::new("c", 'c').next().is_none());
     }
 
     #[test]
     fn split_only_delimiters() {
-        let result = SplitItems::new("ccc", 'c').collect::<Vec<_>>();
-        assert!(result.is_empty());
+        assert!(SplitItems::new("ccc", 'c').next().is_none());
     }
 
     #[test]

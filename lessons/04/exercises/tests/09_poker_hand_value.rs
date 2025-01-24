@@ -41,11 +41,11 @@ enum Card {
 impl Debug for Card {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Card::Numeric(v) => v.fmt(f),
-            Card::Jack => f.write_char('J'),
-            Card::Queen => f.write_char('Q'),
-            Card::King => f.write_char('K'),
-            Card::Ace => f.write_char('A'),
+            Self::Numeric(v) => v.fmt(f),
+            Self::Jack => f.write_char('J'),
+            Self::Queen => f.write_char('Q'),
+            Self::King => f.write_char('K'),
+            Self::Ace => f.write_char('A'),
         }
     }
 }
@@ -104,6 +104,7 @@ impl Hand {
                 'J' => Card::Jack,
                 'T' => Card::Numeric(10),
                 c if c.is_ascii_digit() => {
+                    #[allow(clippy::cast_possible_truncation)]
                     let digit = (c as u32 - '0' as u32) as u8;
                     if digit < 2 {
                         return Err(format!("Invalid card value {digit}"));
