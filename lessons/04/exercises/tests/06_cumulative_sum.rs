@@ -11,6 +11,41 @@
 //! Think about the various trait bounds that you will require for `CumulativeSum` to work.
 //! What operations have to be supported by the two generic types?
 
+use std::fmt::Debug;
+
+struct CumulativeSum<I>
+where
+    I: Iterator,
+    I::Item: std::ops::Add<Output = I::Item> + Copy + Debug,
+{
+    iter: I,
+    sum: Option<I::Item>,
+}
+
+impl<I> CumulativeSum<I>
+where
+    I: Iterator,
+    I::Item: std::ops::Add<Output = I::Item> + Copy + Debug,
+{
+    const fn new(iter: I) -> Self {
+        Self { iter, sum: None }
+    }
+}
+
+impl<I> Iterator for CumulativeSum<I>
+where
+    I: Iterator,
+    I::Item: std::ops::Add<Output = I::Item> + Copy + Debug,
+{
+    type Item = I::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = self.iter.next()?;
+        self.sum = Some(self.sum.map_or(next, |sum| sum + next));
+        self.sum
+    }
+}
+
 /// Below you can find a set of unit tests.
 #[cfg(test)]
 mod tests {

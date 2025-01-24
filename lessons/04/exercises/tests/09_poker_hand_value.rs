@@ -130,14 +130,68 @@ impl PartialOrd for Hand {
 impl Ord for Hand {
     // TODO: implement this method
     fn cmp(&self, other: &Self) -> Ordering {
-        todo!()
+        let value_cmp = self.value().cmp(&other.value());
+        if value_cmp != Ordering::Equal {
+            return value_cmp;
+        }
+
+        for (a, b) in self.cards.iter().zip(other.cards.iter()) {
+            let card_cmp = a.cmp(b);
+            if card_cmp != Ordering::Equal {
+                return card_cmp;
+            }
+        }
+
+        Ordering::Equal
     }
 }
 
 impl Hand {
-    // TODO: implement this method
+    // TODO: implement this method to return the highest possible HandValue
     fn value(&self) -> HandValue {
-        todo!()
+        // Count the number of occurrences of each card
+        let mut card_counts = HashMap::new();
+        for card in &self.cards {
+            *card_counts.entry(card).or_insert(0) += 1;
+        }
+
+        // Count the number of occurrences of each count
+        let mut count_counts = HashMap::new();
+        for count in card_counts.values() {
+            *count_counts.entry(count).or_insert(0) += 1;
+        }
+
+        // Check for FiveOfAKind
+        if count_counts.contains_key(&&5) {
+            return HandValue::FiveOfAKind;
+        }
+
+        // Check for FourOfAKind
+        if count_counts.contains_key(&&4) {
+            return HandValue::FourOfAKind;
+        }
+
+        // Check for FullHouse
+        if count_counts.contains_key(&&3) && count_counts.contains_key(&&2) {
+            return HandValue::FullHouse;
+        }
+
+        // Check for ThreeOfAKind
+        if count_counts.contains_key(&&3) {
+            return HandValue::ThreeOfAKind;
+        }
+
+        // Check for TwoPairs
+        if count_counts.contains_key(&&2) && count_counts[&&2] == 2 {
+            return HandValue::TwoPairs;
+        }
+
+        // Check for OnePair
+        if count_counts.contains_key(&&2) {
+            return HandValue::OnePair;
+        }
+
+        HandValue::HighCard
     }
 }
 

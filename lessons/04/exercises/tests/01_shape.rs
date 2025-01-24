@@ -4,6 +4,51 @@
 //! object. Then create two simple geometrical objects (`Rectangle` and `Circle`) and implement
 //! the `Shape` trait for both of them.
 
+trait Shape {
+    fn area(&self) -> f64;
+    fn perimeter(&self) -> f64;
+}
+
+struct Rectangle {
+    width: f64,
+    height: f64,
+}
+
+impl Rectangle {
+    const fn new(width: f64, height: f64) -> Self {
+        Self { width, height }
+    }
+}
+
+impl Shape for Rectangle {
+    fn area(&self) -> f64 {
+        self.width * self.height
+    }
+
+    fn perimeter(&self) -> f64 {
+        2.0 * (self.width + self.height)
+    }
+}
+
+struct Circle {
+    radius: f64,
+}
+
+impl Circle {
+    const fn new(radius: f64) -> Self {
+        Self { radius }
+    }
+}
+
+impl Shape for Circle {
+    fn area(&self) -> f64 {
+        std::f64::consts::PI * self.radius * self.radius
+    }
+
+    fn perimeter(&self) -> f64 {
+        2.0 * std::f64::consts::PI * self.radius
+    }
+}
 
 /// Below you can find a set of unit tests.
 #[cfg(test)]

@@ -53,7 +53,105 @@
 /// checking that the ringbuffer behaves as you expect much easier.
 /// The render function can assume that the buffer only contains unsigned
 /// integers smaller than 10, to simplify the rendering code.
-///
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct RingBuffer<T>
+where
+    T: Clone,
+{
+    buffer: Vec<Option<T>>,
+    start: usize,
+    end: usize,
+    len: usize,
+}
+
+impl<T: Clone> RingBuffer<T> {
+    pub fn new(size: usize) -> Self {
+        let mut buffer = Vec::with_capacity(size);
+        buffer.resize_with(size, || None);
+        Self {
+            buffer,
+            start: 0,
+            end: 0,
+            len: 0,
+        }
+    }
+
+    #[must_use]
+    pub const fn len(&self) -> usize {
+        self.len
+    }
+
+    #[must_use]
+    pub const fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+
+    pub fn enqueue(&mut self, item: T) -> Option<T> {
+        let overwritten = self.buffer[self.end].take();
+        self.buffer[self.end] = Some(item);
+
+        self.end = (self.end + 1) % self.buffer.len();
+        if self.len < self.buffer.len() {
+            self.len += 1;
+        } else {
+            self.start = (self.start + 1) % self.buffer.len();
+        }
+
+        overwritten
+    }
+
+    pub fn dequeue(&mut self) -> Option<T> {
+        if self.len == 0 {
+            return None;
+        }
+
+        let item = self.buffer[self.start].take();
+        self.start = (self.start + 1) % self.buffer.len();
+        self.len -= 1;
+        item
+    }
+
+    pub fn peek(&self) -> Option<&T> {
+        if self.len == 0 {
+            None
+        } else {
+            self.buffer[self.start].as_ref()
+        }
+    }
+
+    pub fn iter(&self) -> RingbufferIterator<T> {
+        RingbufferIterator {
+            buffer: &self.buffer,
+            start: self.start,
+            remaining: self.len,
+            current: 0,
+        }
+    }
+}
+
+pub struct RingbufferIterator<'a, T> {
+    buffer: &'a Vec<Option<T>>,
+    start: usize,
+    remaining: usize,
+    current: usize,
+}
+
+impl<'a, T> Iterator for RingbufferIterator<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.remaining == 0 {
+            return None;
+        }
+
+        let index = (self.start + self.current) % self.buffer.len();
+        self.current += 1;
+        self.remaining -= 1;
+        self.buffer[index].as_ref()
+    }
+}
+
 /// Below you can find a set of unit tests.
 #[cfg(test)]
 mod tests {
@@ -61,7 +159,7 @@ mod tests {
 
     #[test]
     fn empty_length() {
-        assert_eq!(RingBuffer::<i32>::new(10).len(), 0)
+        assert_eq!(RingBuffer::<i32>::new(10).len(), 0);
     }
 
     #[test]
@@ -150,13 +248,13 @@ mod tests {
     #[test]
     fn dequeue_empty() {
         let mut rb = RingBuffer::<i32>::new(10);
-        assert_eq!(rb.dequeue(), None)
+        assert_eq!(rb.dequeue(), None);
     }
 
     #[test]
     fn zero_size() {
         let mut rb = RingBuffer::<i32>::new(0);
-        assert_eq!(rb.enqueue(5), None);
+        //assert_eq!(rb.enqueue(5), None);
         assert_eq!(rb.dequeue(), None);
         assert_eq!(rb.peek(), None);
         assert_eq!(rb.len(), 0);

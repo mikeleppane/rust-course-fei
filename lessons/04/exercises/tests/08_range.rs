@@ -20,6 +20,80 @@
 //! Obviously, the range should be sparse; store only the start and end values in memory, not all
 //! numbers in the range :) Otherwise tests will explode.
 
+use anyhow::Result;
+
+#[derive(Debug, Clone, Copy)]
+struct Range1D {
+    start: u64,
+    end: u64,
+}
+
+impl Range1D {
+    fn new(start: u64, end: u64) -> Result<Self, String> {
+        if start > end {
+            return Err("Start must not be larger than end".to_string());
+        }
+        Ok(Self { start, end })
+    }
+
+    #[allow(clippy::cast_possible_truncation)]
+    const fn len(&self) -> usize {
+        (self.end - self.start + 1) as usize
+    }
+
+    const fn contains(&self, point: u64) -> bool {
+        self.start <= point && point <= self.end
+    }
+
+    const fn start(&self) -> u64 {
+        self.start
+    }
+
+    const fn end(&self) -> u64 {
+        self.end
+    }
+
+    fn intersect(&self, other: Self) -> Option<Self> {
+        let start = self.start.max(other.start);
+        let end = self.end.min(other.end);
+        if start > end {
+            return None;
+        }
+        Some(Self { start, end })
+    }
+
+    const fn iter(&self) -> Range1DIterator {
+        Range1DIterator {
+            range: self,
+            current: self.start,
+        }
+    }
+}
+
+struct Range1DIterator<'a> {
+    range: &'a Range1D,
+    current: u64,
+}
+
+impl Iterator for Range1DIterator<'_> {
+    type Item = u64;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current > self.range.end {
+            return None;
+        }
+        let current = self.current;
+        self.current += 1;
+        Some(current)
+    }
+}
+
+impl PartialEq for Range1D {
+    fn eq(&self, other: &Self) -> bool {
+        self.start == other.start && self.end == other.end
+    }
+}
+
 /// Below you can find a set of unit tests.
 #[cfg(test)]
 mod tests {
@@ -57,10 +131,10 @@ mod tests {
 
     #[test]
     fn create_range_large() {
-        let range = Range1D::new(1, 50000000000000000).unwrap();
+        let range = Range1D::new(1, 50_000_000_000_000_000).unwrap();
         assert_eq!(range.start(), 1);
-        assert_eq!(range.end(), 50000000000000000);
-        assert_eq!(range.len(), 50000000000000000);
+        assert_eq!(range.end(), 50_000_000_000_000_000);
+        assert_eq!(range.len(), 50_000_000_000_000_000);
     }
 
     #[test]

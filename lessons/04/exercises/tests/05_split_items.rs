@@ -10,6 +10,54 @@
 //! The iterator has to be **lazy**! It should not copy the whole input array
 //! (in other words, it should have space complexity O(1)).
 
+struct SplitItems<'a> {
+    data: &'a str,
+    delimiter: char,
+    start: usize,
+    end: usize,
+}
+
+impl<'a> SplitItems<'a> {
+    const fn new(data: &'a str, delimiter: char) -> Self {
+        Self {
+            data,
+            delimiter,
+            start: 0,
+            end: 0,
+        }
+    }
+}
+
+impl<'a> Iterator for SplitItems<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.end == self.data.len() {
+            return None;
+        }
+
+        self.start = self.end;
+        while self.start < self.data.len()
+            && self.data.chars().nth(self.start).unwrap() == self.delimiter
+        {
+            self.start += 1;
+        }
+
+        self.end = self.start;
+        while self.end < self.data.len()
+            && self.data.chars().nth(self.end).unwrap() != self.delimiter
+        {
+            self.end += 1;
+        }
+
+        if self.start == self.end {
+            return self.next();
+        }
+
+        Some(&self.data[self.start..self.end])
+    }
+}
+
 /// Below you can find a set of unit tests.
 #[cfg(test)]
 mod tests {

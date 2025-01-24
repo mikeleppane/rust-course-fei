@@ -6,6 +6,16 @@
 //! Try to implement the returned iterator using iterator adapters, not an explicit struct.
 //! Use `impl Iterator` for the return type.
 
+fn keep_even<T>(iter: T) -> impl Iterator<Item = T::Item>
+where
+    T: IntoIterator,
+    T::Item: Copy,
+{
+    iter.into_iter()
+        .enumerate()
+        .filter_map(|(i, v)| if i % 2 == 0 { Some(v) } else { None })
+}
+
 /// TODO: Implement a function called `find_third_42`, which find the index
 /// of the **third** occurrence of the number 42 in the input slice.
 ///
@@ -14,7 +24,11 @@
 /// Example 1: `[0,1,42,3,42,5,6,42,8,9]` -> Some(7)
 /// Example 2: `[0,1,42,3,42,5,6,7,8,9]` -> None
 fn find_third_42(vec: &[i64]) -> Option<usize> {
-    todo!()
+    vec.iter()
+        .enumerate()
+        .filter(|(_, &v)| v == 42)
+        .nth(2)
+        .map(|(i, _)| i)
 }
 
 /// Below you can find a set of unit tests.

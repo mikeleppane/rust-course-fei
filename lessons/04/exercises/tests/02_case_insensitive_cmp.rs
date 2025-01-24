@@ -4,6 +4,30 @@
 //! two (ASCII) string slices in a case insensitive way, without performing any reallocations
 //! and without modifying the original strings.
 
+struct CaseInsensitive<'a>(&'a str);
+
+impl PartialEq for CaseInsensitive<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.eq_ignore_ascii_case(other.0)
+    }
+}
+
+impl Eq for CaseInsensitive<'_> {}
+
+impl PartialOrd for CaseInsensitive<'_> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for CaseInsensitive<'_> {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.0
+            .to_ascii_lowercase()
+            .cmp(&other.0.to_ascii_lowercase())
+    }
+}
+
 /// Below you can find a set of unit tests.
 #[cfg(test)]
 mod tests {
@@ -15,7 +39,9 @@ mod tests {
         assert!(CaseInsensitive("a") == CaseInsensitive("A"));
         assert!(CaseInsensitive("a") == CaseInsensitive("a"));
         assert!(CaseInsensitive("Foo") == CaseInsensitive(&String::from("fOo")));
-        assert!(CaseInsensitive("12ABBBcLPQusdaweliAS2") == CaseInsensitive("12AbbbclpQUSdawelias2"));
+        assert!(
+            CaseInsensitive("12ABBBcLPQusdaweliAS2") == CaseInsensitive("12AbbbclpQUSdawelias2")
+        );
     }
 
     #[test]
